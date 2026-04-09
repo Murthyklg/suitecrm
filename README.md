@@ -1,96 +1,231 @@
-<a href="https://suitecrm.com">
-  <img width="180px" height="41px" src="https://suitecrm.com/wp-content/uploads/2017/12/logo.png" align="right" />
-</a>
+# SuiteCRM Dockerized Setup
 
-# SuiteCRM 7.15.1
+This repository contains a Dockerized setup of the open-source CRM platform **[SuiteCRM](https://github.com/SuiteCRM/SuiteCRM)**. The goal is to provide a **reproducible, scalable, and production-ready environment** using Docker.
 
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/SuiteCRM/SuiteCRM/issues)
-[![GitHub contributors](https://img.shields.io/github/contributors/SuiteCRM/suitecrm)](https://github.com/SuiteCRM/SuiteCRM/graphs/contributors)
-[![LICENSE](https://img.shields.io/github/license/suitecrm/suitecrm.svg)](https://github.com/SuiteCRM/suitecrm/blob/hotfix/LICENSE.txt)
+---
+
+## 📦 Overview
+
+SuiteCRM is a PHP-based CRM system that requires:
+
+* PHP (Apache)
+* MySQL database
+* Composer dependencies
+
+This project containerizes the entire setup using:
+
+* 🐳 Docker
+* 📦 Docker Compose
+* ⚙️ Multi-stage builds for optimization
+
+---
+
+## 🧱 Architecture
+
+```
+User → SuiteCRM App (PHP + Apache) → MySQL Database
+```
+
+### Services:
+
+| Service      | Description                    |
+| ------------ | ------------------------------ |
+| `app`        | SuiteCRM application container |
+| `db`         | MySQL 5.7 database             |
+| `phpmyadmin` | Optional DB management UI      |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/SuiteCRM/SuiteCRM.git
+cd SuiteCRM
+```
+
+---
+
+### 2. Add Docker Configuration
+
+Ensure the following files exist in the root:
+
+* `Dockerfile`
+* `docker-compose.yml`
+* `php.ini`
+* `apache.conf`
+
+---
+
+### 3. Build & Run Containers
+
+```bash
+docker-compose up -d --build
+```
+
+---
+
+### 4. Access Application
+
+* SuiteCRM → http://localhost:8080
+* phpMyAdmin → http://localhost:8081
+
+---
+
+## ⚙️ Dockerization Approach
+
+🔹 Single-Stage Docker Build
+
+This setup uses a single-stage Dockerfile, where:
+
+PHP 8.2 with Apache is used as the base image
+System dependencies and PHP extensions are installed
+Composer is installed inside the container
+Application source code is copied into the container
+Composer dependencies are installed during build
+
+🔹 Key Steps in Dockerfile
+Install system dependencies and PHP extensions
+Enable Apache modules (mod_rewrite)
+Install Composer
+Copy application source code
+Run composer install
+Set correct file permissions
+Apply custom PHP and Apache configurations
+
+### 🔹 Key Optimizations
+
+* ✅ Reduced image size using multi-stage builds
+* ✅ Removed dev dependencies
+* ✅ Cleaned package cache
+* ✅ Optimized Composer autoload
+* ✅ No Composer in production image
+
+---
+
+### 🔹 PHP Configuration
+
+Custom `php.ini` is used to support SuiteCRM requirements:
+
+```ini
+upload_max_filesize = 50M
+post_max_size = 50M
+memory_limit = 512M
+max_execution_time = 300
+```
+
+---
+
+### 🔹 Apache Configuration
+
+* Enabled `mod_rewrite`
+* Configured document root
+* Allowed `.htaccess` overrides
+
+---
+
+## 🗄 Database Configuration
+
+Default credentials:
+
+| Key      | Value    |
+| -------- | -------- |
+| Host     | db       |
+| Database | suitecrm |
+| User     | suitecrm |
+| Password | suitecrm |
+
+---
+
+## 📁 Important Directories
+
+These directories must be writable:
+
+* `cache/`
+* `custom/`
+* `modules/`
+* `themes/`
+* `upload/`
+
+They are created and permissioned during container build.
+
+---
+### ⚠️ PHP Version Compatibility
+
+* Recommended: **PHP 8.1 / 8.2**
+* Ensure compatibility with your SuiteCRM version
+
+---
+
+## 🧪 Troubleshooting
+
+### Composer Autoloader Error
+
+```bash
+docker exec -it suitecrm_app composer install
+```
+
+---
+
+### Permission Issues
+
+```bash
+docker exec -it suitecrm_app bash
+chown -R www-data:www-data /var/www/html
+chmod -R 775 cache custom modules themes upload
+```
+
+---
+
+### Port Conflict
+
+Change port in `docker-compose.yml`:
+
+```yaml
+ports:
+  - "8082:80"
+```
+
+---
+
+## 🛠 Tech Stack
+
+* PHP 8.2 (Apache)
+* MySQL 5.7
+* Docker & Docker Compose
+* Composer
+
+---
+
+## 🏆 Key Benefits
+
+* One-command setup
+* Environment consistency
+* Production-ready container
+* Easy deployment to Kubernetes
+* Scalable architecture
+
+---
+
+## 📌 Future Improvements
+
+* Add Nginx reverse proxy
+* Enable HTTPS (Let's Encrypt)
+* Integrate Redis caching
+* CI/CD pipeline (GitHub Actions)
+* Helm charts for Kubernetes
+
+---
+
+## 📄 License
+
+This project is based on SuiteCRM, which is open-source under its respective license.
 
 
 
-[Website](https://suitecrm.com) |
-[Demo](https://suitecrm.com/demo/) |
-[Maintainers](https://suitecrm.com/about/about-us/suitecrm-ltd/) |
-[Contributors](https://github.com/SuiteCRM/SuiteCRM/graphs/contributors) |
-[Community Forum](https://community.suitecrm.com/) |
-[Partners](https://suitecrm.com/about/about-us/partners/) |
-[Extensions Directory](https://store.suitecrm.com/?tag=suitecrm) |
-[Translations](https://sourceforge.net/projects/suitecrmtranslations/)
+## 💡 Final Note
 
-[SuiteCRM](https://suitecrm.com) is the award-winning open-source, enterprise-ready Customer Relationship Management (CRM) software application.
+This setup transforms SuiteCRM into a **modern, containerized application**, making it easier to develop, deploy, and scale across environments.
 
-Our vision is to be the most adopted open source enterprise CRM in the world, giving users full control of their data and freedom to own and customise their business solution.
-
-SuiteCRM 7 is a mature and stable CRM with a large community and regular releases containing new features, security patches and bug fixes from both our community and the SuiteCRM team.
-
-You may also be interested in [SuiteCRM 8](https://github.com/SuiteCRM/SuiteCRM-Core) the latest version of SuiteCRM. At the time of writing, SuiteCRM 8 is in the levelling up phase and not yet as feature complete. More information is available on the [SuiteCRM Journey ](https://suitecrm.com/the-suitecrm-8-journey/).
-
-### Getting Started
-
-SuiteCRM 7 is compatible with most Linux and Windows servers. Test and development servers can be deployed locally, however for best performance and compatibility we recommend hosting on a linux based server with a properly configured LAMP Stack. As SuiteCRM is based on standard technologies like Apache, PHP and MySQL, the CRM can be self-hosted on your own internal network, on a public cloud provider or on a fully managed hosting service.
-
-#### Key System Requirements
-* **Web Server:** Apache (recommended) or IIS
-* **PHP:** 8.1 - 8.4
-* **Database:** MySQL or MariaDB (recommended) or MSSQL
-
-Please see our [Compatibility Matrix](https://docs.suitecrm.com/admin/compatibility-matrix/) and [Installation Guide](https://docs.suitecrm.com/admin/installation-guide/downloading-installing/) for more detail.
-
-SuiteCRM Ltd, the authors and maintainers of SuiteCRM offer a range of [fully managed hosting](https://suitecrm.com/suitecrmhosted/) services. These are ideal for organisations who don't have the in house knowledge or experience to host and maintain the application and are a great way to support the future development of the project.
-
-### Demo
-
-We have a demo of SuiteCRM 7 available online, allowing you to easily try the CRM and some of its features.
-
-Try out our demo here: [Click here to visit the SuiteCRM Demo](https://suitecrm.com/demo/)
-
-The demo rebuilds every hour, so any changes made will be removed automatically on a regular basis. Please note the demo is public so don't upload any personal information.
-
-### Updating SuiteCRM
-
-To benefit from the latest security and bugfixes as well as the most comprehensive feature set, we recommend all users upgrade to the latest ESR release at their earliest opportunity. See our [upgrade documentation](https://docs.suitecrm.com/admin/installation-guide/upgrading/) for more detail.
-
-### News and Releases
-
-To stay up to date on our latest releases, including security patches and fixes we recommend you monitor our [News Page](https://suitecrm.com/about/newsroom/press/) and [Release Notes](https://docs.suitecrm.com/admin/releases/)
-
-You can also [Subscribe to our Newsletter](https://suitecrm.com/about/about-us/sign-up-for-marketing/) or follow us on Social Media.
-
-### Code Contributors
-
-This project exists thanks to all the people who [contribute](https://github.com/SuiteCRM/SuiteCRM/graphs/contributors) and more.
-<a href="https://github.com/SuiteCRM/SuiteCRM/graphs/contributors"><img src="https://opencollective.com/SuiteCRM/contributors.svg?avatarHeight=36&width=890&button=false" /></a>
-
-As an open source project, we welcome sponsorships from our individuals and organisations in our community. Your contribution to the project will help drive the SuiteCRM project forward at a greater rate.
-
-If you use SuiteCRM in your organisation, please consider [sponsoring the SuiteCRM Project](https://suitecrm.com/join-the-project/suitecrm-community-sponsorship/)
-
-Or if You want to buy the **core team** a coffee :coffee: or beer :beer:?
-Then consider a small [donation](https://opencollective.com/SuiteCRM/contribute) to help fuel our activities :heart:
-
-
-### Roadmap ### 
-
-View the [Roadmap](https://suitecrm.com/roadmap/) for details on our planned features and future direction.
-
-### Support ###
-
-SuiteCRM is an open-source project. If you require help with support then please use our [support forum](https://community.suitecrm.com/). By using the forums the knowledge is shared with everyone in the community. Our developer and community team members answer questions on the forum daily, but it also allows the other members of the community to contribute. If you would like customisations to specifically fit your SuiteCRM needs then please visit the [website](https://suitecrm.com/).
-
-SuiteCRM Ltd also offers a range of complimentary hosting and support services:
-
-- [Hosting](https://suitecrm.com/suitecrmhosted/)
-- [Support Plans](https://suitecrm.com/enterprise/support-plans/)
-- [SuiteASSURED](https://suitecrm.com/enterprise/suiteassured/)
-
-By utilising these services you are also contributing to the future development and progress of the project.
-
-### License [![AGPLv3](https://img.shields.io/github/license/suitecrm/suitecrm.svg)](./LICENSE.txt)
-
-SuiteCRM is published under the AGPLv3 license.
-
-
-
-
+---
